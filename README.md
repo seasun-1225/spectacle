@@ -6,6 +6,7 @@ Spectacle is a modern, premium web application designed for job applicants to or
 Built with a sleek, responsive **sky blue theme**, glassmorphic panels, and smooth micro-animations.
 
 demo: https://seasun-1225.github.io/spectacle/
+
 ---
 
 ## 🚀 Key Features
