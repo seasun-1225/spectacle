@@ -17,7 +17,7 @@ Built with a sleek, responsive **sky blue theme**, glassmorphic panels, and smoo
 ### 2. Experience Repository
 - A central inventory compiling all uploaded materials, raw text extracts, and structured STAR items.
 - Search key phrases or filter instantly by experience type (Work, Internship, Personal Project).
-- Review conversational audit trails and download the entire structured portfolio as a portable `.json` backup.
+- Review conversational audit trails and add new experiences manually with structured STAR details directly from the dashboard.
 
 ### 3. Resume & Cover Letter Builder
 - Select preloaded job requirements (Google, Meta, Apple, etc.) or paste custom descriptions.

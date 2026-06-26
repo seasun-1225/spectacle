@@ -1,12 +1,26 @@
 import React, { useState } from 'react';
 import { useExperiences } from '../context/ExperienceContext';
-import { Archive, Tag, CheckCircle2, FileText, MessageSquare, Calendar, Briefcase, Search, Filter, Download, ArrowRight, Award } from 'lucide-react';
+import { Archive, Tag, CheckCircle2, FileText, MessageSquare, Calendar, Briefcase, Search, Filter, ArrowRight, Award, Plus } from 'lucide-react';
 
 export default function ExperienceRepository() {
-  const { experiences, chatHistory } = useExperiences();
+  const { experiences, chatHistory, addExperience } = useExperiences();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedType, setSelectedType] = useState('All');
   const [expandedCardId, setExpandedCardId] = useState(null);
+  const [showAddForm, setShowAddForm] = useState(false);
+  const [newExp, setNewExp] = useState({
+    title: '',
+    company: '',
+    period: '',
+    type: 'Work Experience',
+    education: '',
+    skills: '',
+    strengths: '',
+    situation: '',
+    task: '',
+    action: '',
+    result: ''
+  });
 
   const experienceTypes = ['All', 'Work Experience', 'Internship', 'Project'];
 
@@ -29,14 +43,44 @@ export default function ExperienceRepository() {
     setExpandedCardId(expandedCardId === id ? null : id);
   };
 
-  const handleExportJSON = () => {
-    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(experiences, null, 2));
-    const downloadAnchor = document.createElement('a');
-    downloadAnchor.setAttribute("href", dataStr);
-    downloadAnchor.setAttribute("download", `Spectacle_Career_Repository.json`);
-    document.body.appendChild(downloadAnchor);
-    downloadAnchor.click();
-    downloadAnchor.remove();
+  const handleAddSubmit = (e) => {
+    e.preventDefault();
+    if (!newExp.title || !newExp.company) return;
+
+    const skillsArr = newExp.skills ? newExp.skills.split(',').map(s => s.trim()).filter(Boolean) : [];
+    const strengthsArr = newExp.strengths ? newExp.strengths.split(',').map(s => s.trim()).filter(Boolean) : [];
+
+    addExperience({
+      title: newExp.title,
+      company: newExp.company,
+      period: newExp.period,
+      type: newExp.type,
+      description: newExp.situation || newExp.task || 'Added manually',
+      education: newExp.education,
+      skills: skillsArr,
+      strengths: strengthsArr,
+      star: {
+        situation: newExp.situation,
+        task: newExp.task,
+        action: newExp.action,
+        result: newExp.result
+      }
+    });
+
+    setNewExp({
+      title: '',
+      company: '',
+      period: '',
+      type: 'Work Experience',
+      education: '',
+      skills: '',
+      strengths: '',
+      situation: '',
+      task: '',
+      action: '',
+      result: ''
+    });
+    setShowAddForm(false);
   };
 
   const getRelevantChatLogs = (expTitle, expCompany) => {
@@ -62,13 +106,187 @@ export default function ExperienceRepository() {
         </div>
 
         <button 
-          onClick={handleExportJSON}
-          className="btn btn-secondary"
+          onClick={() => setShowAddForm(!showAddForm)}
+          className="btn btn-primary"
           style={{ padding: '0.6rem 1.25rem', fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}
         >
-          <Download size={16} /> Export JSON Data
+          <Plus size={16} /> Add Experience
         </button>
       </div>
+
+      {/* Add New Experience Form Overlay */}
+      {showAddForm && (
+        <form onSubmit={handleAddSubmit} style={{
+          padding: '1.5rem',
+          background: 'rgba(255,255,255,0.45)',
+          border: '1px solid var(--border-glass)',
+          borderRadius: 'var(--radius-md)',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '1rem',
+          animation: 'fadeIn 0.2s ease-out'
+        }}>
+          <h4 style={{ fontSize: '1.1rem', fontWeight: 700, color: 'var(--text-primary)', borderBottom: '1px solid var(--border-glass)', paddingBottom: '0.5rem', marginBottom: '0.25rem' }}>
+            Add New Experience
+          </h4>
+          
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+            <div>
+              <label className="form-label" style={{ fontSize: '0.8rem', marginBottom: '0.25rem' }}>Job Title / Role *</label>
+              <input 
+                type="text" 
+                placeholder="e.g. Senior Software Engineer" 
+                className="form-input"
+                value={newExp.title}
+                onChange={e => setNewExp({...newExp, title: e.target.value})}
+                required
+                style={{ padding: '0.5rem 0.75rem', fontSize: '0.85rem' }}
+              />
+            </div>
+            <div>
+              <label className="form-label" style={{ fontSize: '0.8rem', marginBottom: '0.25rem' }}>Company / Organization *</label>
+              <input 
+                type="text" 
+                placeholder="e.g. Google" 
+                className="form-input"
+                value={newExp.company}
+                onChange={e => setNewExp({...newExp, company: e.target.value})}
+                required
+                style={{ padding: '0.5rem 0.75rem', fontSize: '0.85rem' }}
+              />
+            </div>
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+            <div>
+              <label className="form-label" style={{ fontSize: '0.8rem', marginBottom: '0.25rem' }}>Period *</label>
+              <input 
+                type="text" 
+                placeholder="e.g. 2023 - Present" 
+                className="form-input"
+                value={newExp.period}
+                onChange={e => setNewExp({...newExp, period: e.target.value})}
+                required
+                style={{ padding: '0.5rem 0.75rem', fontSize: '0.85rem' }}
+              />
+            </div>
+            <div>
+              <label className="form-label" style={{ fontSize: '0.8rem', marginBottom: '0.25rem' }}>Experience Type</label>
+              <select 
+                className="form-select"
+                value={newExp.type}
+                onChange={e => setNewExp({...newExp, type: e.target.value})}
+                style={{ padding: '0.5rem 0.75rem', fontSize: '0.85rem' }}
+              >
+                <option value="Work Experience">Work Experience</option>
+                <option value="Internship">Internship</option>
+                <option value="Project">Personal Project</option>
+              </select>
+            </div>
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+            <div>
+              <label className="form-label" style={{ fontSize: '0.8rem', marginBottom: '0.25rem' }}>Skills (comma-separated)</label>
+              <input 
+                type="text" 
+                placeholder="e.g. React, Vite, CSS, JavaScript" 
+                className="form-input"
+                value={newExp.skills}
+                onChange={e => setNewExp({...newExp, skills: e.target.value})}
+                style={{ padding: '0.5rem 0.75rem', fontSize: '0.85rem' }}
+              />
+            </div>
+            <div>
+              <label className="form-label" style={{ fontSize: '0.8rem', marginBottom: '0.25rem' }}>Strengths (comma-separated)</label>
+              <input 
+                type="text" 
+                placeholder="e.g. Systems Migration, UI/UX" 
+                className="form-input"
+                value={newExp.strengths}
+                onChange={e => setNewExp({...newExp, strengths: e.target.value})}
+                style={{ padding: '0.5rem 0.75rem', fontSize: '0.85rem' }}
+              />
+            </div>
+          </div>
+
+          <div>
+            <label className="form-label" style={{ fontSize: '0.8rem', marginBottom: '0.25rem' }}>Education / Certifications</label>
+            <input 
+              type="text" 
+              placeholder="e.g. BS in Computer Science, State University" 
+              className="form-input"
+              value={newExp.education}
+              onChange={e => setNewExp({...newExp, education: e.target.value})}
+              style={{ padding: '0.5rem 0.75rem', fontSize: '0.85rem' }}
+            />
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+            <div>
+              <label className="form-label" style={{ fontSize: '0.8rem', marginBottom: '0.25rem' }}>Situation (STAR Context)</label>
+              <textarea 
+                placeholder="Describe the context or challenge..." 
+                className="form-textarea"
+                value={newExp.situation}
+                onChange={e => setNewExp({...newExp, situation: e.target.value})}
+                style={{ padding: '0.5rem 0.75rem', fontSize: '0.85rem', minHeight: '60px' }}
+              />
+            </div>
+            <div>
+              <label className="form-label" style={{ fontSize: '0.8rem', marginBottom: '0.25rem' }}>Task (STAR Objective)</label>
+              <textarea 
+                placeholder="Describe your goals or objectives..." 
+                className="form-textarea"
+                value={newExp.task}
+                onChange={e => setNewExp({...newExp, task: e.target.value})}
+                style={{ padding: '0.5rem 0.75rem', fontSize: '0.85rem', minHeight: '60px' }}
+              />
+            </div>
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+            <div>
+              <label className="form-label" style={{ fontSize: '0.8rem', marginBottom: '0.25rem' }}>Action (STAR Execution)</label>
+              <textarea 
+                placeholder="Describe the actions and technologies used..." 
+                className="form-textarea"
+                value={newExp.action}
+                onChange={e => setNewExp({...newExp, action: e.target.value})}
+                style={{ padding: '0.5rem 0.75rem', fontSize: '0.85rem', minHeight: '60px' }}
+              />
+            </div>
+            <div>
+              <label className="form-label" style={{ fontSize: '0.8rem', marginBottom: '0.25rem' }}>Result (STAR Outcome)</label>
+              <textarea 
+                placeholder="Describe the quantitative or qualitative results..." 
+                className="form-textarea"
+                value={newExp.result}
+                onChange={e => setNewExp({...newExp, result: e.target.value})}
+                style={{ padding: '0.5rem 0.75rem', fontSize: '0.85rem', minHeight: '60px' }}
+              />
+            </div>
+          </div>
+
+          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.5rem', marginTop: '0.5rem' }}>
+            <button 
+              type="button" 
+              className="btn btn-secondary" 
+              onClick={() => setShowAddForm(false)}
+              style={{ padding: '0.5rem 1.25rem', fontSize: '0.85rem' }}
+            >
+              Cancel
+            </button>
+            <button 
+              type="submit" 
+              className="btn btn-primary"
+              style={{ padding: '0.5rem 1.25rem', fontSize: '0.85rem' }}
+            >
+              Save Experience
+            </button>
+          </div>
+        </form>
+      )}
 
       {/* Search and Filters Layout */}
       <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', alignItems: 'center' }}>
